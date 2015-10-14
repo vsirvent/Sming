@@ -7,6 +7,7 @@
 
 #include "TelnetServer.h"
 #include "TcpServer.h"
+#include "../UdpLog.h"
 
 TelnetServer::TelnetServer() : TcpServer()
 {

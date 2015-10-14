@@ -16,28 +16,52 @@ using namespace ArduinoJson::Internals;
 
 JsonStringStorage JsonStringStorage::_invalid(NULL);
 
-JsonArray &JsonBuffer::createArray() {
-  JsonArray *ptr = new (this) JsonArray(this);
-  return ptr ? *ptr : JsonArray::invalid();
+JsonArray &JsonBuffer::createArray()
+{
+	JsonArray *ptr = new (this) JsonArray(this);
+	if (ptr)
+	{
+		allocs.add(ptr);
+	}
+	return ptr ? *ptr : JsonArray::invalid();
 }
 
-JsonObject &JsonBuffer::createObject() {
-  JsonObject *ptr = new (this) JsonObject(this);
-  return ptr ? *ptr : JsonObject::invalid();
+JsonObject &JsonBuffer::createObject()
+{
+	JsonObject *ptr = new (this) JsonObject(this);
+	if (ptr)
+	{
+		allocs.add(ptr);
+	}
+	return ptr ? *ptr : JsonObject::invalid();
 }
 
-JsonArray &JsonBuffer::parseArray(char *json, uint8_t nestingLimit) {
-  JsonParser parser(this, json, nestingLimit);
-  return parser.parseArray();
+JsonBuffer::~JsonBuffer()
+{
+	for (int i = 0; i < allocs.size(); ++i)
+	{
+		delete allocs[i];
+	}
+}
+JsonArray &JsonBuffer::parseArray(char *json, uint8_t nestingLimit)
+{
+	JsonParser parser(this, json, nestingLimit);
+	return parser.parseArray();
 }
 
-JsonObject &JsonBuffer::parseObject(char *json, uint8_t nestingLimit) {
-  JsonParser parser(this, json, nestingLimit);
-  return parser.parseObject();
+JsonObject &JsonBuffer::parseObject(char *json, uint8_t nestingLimit)
+{
+	JsonParser parser(this, json, nestingLimit);
+	return parser.parseObject();
 }
 
-JsonStringStorage& ArduinoJson::JsonBuffer::createStringStorage(const String& text)
+JsonStringStorage& ArduinoJson::JsonBuffer::createStringStorage(
+		const String& text)
 {
 	JsonStringStorage *ptr = new (this) JsonStringStorage(text);
+	if (ptr)
+	{
+		allocs.add(ptr);
+	}
 	return ptr ? *ptr : JsonStringStorage::invalid();
 }

@@ -4,6 +4,7 @@
  */
 
 #include <Debug.h>
+#include "UdpLog.h"
 
 DebugClass::DebugClass()
 {

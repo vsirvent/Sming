@@ -13,11 +13,14 @@ namespace Internals {
 
 class JsonBufferAllocated {
  public:
+  virtual ~JsonBufferAllocated(){}
   void *operator new(size_t n, JsonBuffer *jsonBuffer) throw() {
     return jsonBuffer->alloc(n);
   }
 
   void operator delete(void *, JsonBuffer *) throw() {}
+
+  void operator delete(void *) throw() {}
 };
 }
 }

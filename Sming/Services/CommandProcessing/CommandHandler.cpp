@@ -7,6 +7,7 @@
 
 #include "CommandHandler.h"
 #include "CommandDelegate.h"
+#include "../../SmingCore/UdpLog.h"
 
 CommandHandler::CommandHandler()
 {
@@ -112,13 +113,13 @@ void CommandHandler::procesEchoCommand(String commandLine, CommandOutput* comman
 
 void CommandHandler::procesDebugOnCommand(String commandLine, CommandOutput* commandOutput)
 {
-	Serial.systemDebugOutput(true);
+	HWSerial.systemDebugOutput(true);
 	commandOutput->printf("Debug set to : On\r\n");
 }
 
 void CommandHandler::procesDebugOffCommand(String commandLine, CommandOutput* commandOutput)
 {
-	Serial.systemDebugOutput(false);
+	HWSerial.systemDebugOutput(false);
 	commandOutput->printf("Debug set to : Off\r\n");
 }
 

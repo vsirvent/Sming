@@ -26,6 +26,9 @@ SPI_MODE ?= qio
 # SPI_SIZE: 512K, 256K, 1M, 2M, 4M
 SPI_SIZE ?= 512K
 
+# Full path spiffy command, if not in path.
+SPIFFY ?= spiffy
+
 ## ESP_HOME sets the path where ESP tools and SDK are located.
 ## Windows:
 # ESP_HOME = c:/Espressif
@@ -71,7 +74,7 @@ else
       SMING_HOME ?= /opt/sming/Sming
 
       # Default ESP_HOME. Can be overriden.
-      ESP_HOME ?= /opt/esp-open-sdk
+      #ESP_HOME ?= /opt/esp-open-sdk
 
       include $(SMING_HOME)/Makefile-macos.mk      
   endif
@@ -83,7 +86,7 @@ else
       SMING_HOME ?= /opt/sming/Sming
 
       # Default ESP_HOME. Can be overriden.
-      ESP_HOME ?= /opt/esp-open-sdk
+      #ESP_HOME ?= /opt/esp-open-sdk
       include $(SMING_HOME)/Makefile-linux.mk     
   endif
   ifeq ($(UNAME),FreeBSD)
@@ -122,11 +125,11 @@ TARGET		= app
 # define your custom directories in the project's own Makefile before including this one
 MODULES 	?= app  # if not initialized by user 
 MODULES		+= $(SMING_HOME)/appinit
-EXTRA_INCDIR    ?= include $(SMING_HOME)/include $(SMING_HOME)/ $(SMING_HOME)/system/include $(SMING_HOME)/Wiring $(SMING_HOME)/Libraries $(SMING_HOME)/SmingCore $(SDK_BASE)/../include
+EXTRA_INCDIR    ?= $(ESP_HOME)/include include $(SMING_HOME)/include $(SMING_HOME)/ $(SMING_HOME)/system/include $(SMING_HOME)/Wiring $(SMING_HOME)/Libraries $(SMING_HOME)/SmingCore $(SDK_BASE)/../include $(SMING_HOME)/rboot $(SMING_HOME)/rboot/appcode
 
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = $(SMING_HOME)/compiler/lib/
-LIBS		= microc microgcc hal phy pp net80211 lwip wpa main sming $(EXTRA_LIBS)
+LIBS		= microc microgcc hal phy pp net80211 lwip wpa main sming  $(EXTRA_LIBS)
 
 # compiler flags using during compilation of source files
 CFLAGS		= -Os -g -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106
@@ -232,7 +235,8 @@ LIBS		:= $(addprefix -l,$(LIBS))
 APP_AR		:= $(addprefix $(BUILD_BASE)/,$(TARGET)_app.a)
 TARGET_OUT	:= $(addprefix $(BUILD_BASE)/,$(TARGET).out)
 
-SPIFF_BIN_OUT := $(FW_BASE)/spiff_rom.bin
+SPIFF_BIN_OUT ?= spiff_rom
+SPIFF_BIN_OUT := $(FW_BASE)/$(SPIFF_BIN_OUT).bin
 LD_SCRIPT	:= $(addprefix -T,$(LD_SCRIPT))
 
 INCDIR	:= $(addprefix -I,$(SRC_DIR))
@@ -280,7 +284,7 @@ $(TARGET_OUT): $(APP_AR)
 	
 	$(Q) $(MEMANALYZER) $@ > $(FW_MEMINFO_NEW)
 	
-	$(Q) if [[ -f "$(FW_MEMINFO_NEW)" && -f "$(FW_MEMINFO_OLD)" ]]; then \
+	$(Q) if [[ -f "$(FW_MEMINFO_NEW)"  && -f "$(FW_MEMINFO_OLD)" ]]; then \
 	  awk -F "|" 'FILENAME == "$(FW_MEMINFO_OLD)" { arr[$$1]=$$5 } FILENAME == "$(FW_MEMINFO_NEW)" { if (arr[$$1] != $$5){printf "%s%s%+d%s", substr($$0, 1, length($$0) - 1)," (",$$5 - arr[$$1],")\n" } else {print $$0} }' $(FW_MEMINFO_OLD) $(FW_MEMINFO_NEW); \
 	elif [ -f "$(FW_MEMINFO_NEW)" ]; then \
 	  cat $(FW_MEMINFO_NEW); \
@@ -315,15 +319,15 @@ else
 	# Generating spiffs_bin
 	$(vecho) "Checking for spiffs files"
 	$(Q) if [ -d "$(SPIFF_FILES)" ]; then \
-    	echo "$(SPIFF_FILES) directory exists. Creating spiff_rom.bin"; \
-    	spiffy $(SPIFF_SIZE) $(SPIFF_FILES); \
-    	mv spiff_rom.bin $(FW_BASE)/spiff_rom.bin; \
+    	echo "$(SPIFF_FILES) directory exists. Creating $(SPIFF_BIN_OUT)"; \
+    	$(SPIFFY) $(SPIFF_SIZE) $(SPIFF_FILES); \
+    	mv spiff_rom.bin $(SPIFF_BIN_OUT); \
 	else \
     	echo "No files found in ./$(SPIFF_FILES)."; \
-    	echo "Creating empty spiff_rom.bin ($$($(GET_FILESIZE) $(SMING_HOME)/compiler/data/blankfs.bin) bytes)"; \
-    cp $(SMING_HOME)/compiler/data/blankfs.bin $(FW_BASE)/spiff_rom.bin; \
+    	echo "Creating empty $(SPIFF_BIN_OUT) ($$($(GET_FILESIZE) $(SMING_HOME)/compiler/data/blankfs.bin) bytes)"; \
+    	cp $(SMING_HOME)/compiler/data/blankfs.bin $(SPIFF_BIN_OUT); \
 	fi
-	$(vecho) "spiff_rom.bin---------->$(SPIFF_START_OFFSET)"
+	$(vecho) "$(SPIFF_BIN_OUT)---------->$(SPIFF_START_OFFSET)"
 endif
 
 flash: all
@@ -332,7 +336,7 @@ flash: all
 ifeq ($(DISABLE_SPIFFS), 1)
 	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x09000 $(FW_BASE)/0x09000.bin
 else
-	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x09000 $(FW_BASE)/0x09000.bin $(SPIFF_START_OFFSET) $(FW_BASE)/spiff_rom.bin
+	$(ESPTOOL) -p $(COM_PORT) -b $(COM_SPEED_ESPTOOL) write_flash $(flashimageoptions) 0x00000 $(FW_BASE)/0x00000.bin 0x09000 $(FW_BASE)/0x09000.bin $(SPIFF_START_OFFSET) $(SPIFF_BIN_OUT)
 endif
 	$(TERMINAL)
 

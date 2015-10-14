@@ -15,10 +15,14 @@ class JsonStringStorage : public Internals::ReferenceType,
                   	  	  public Internals::JsonBufferAllocated
 {
 public:
-	JsonStringStorage(const String text)
+	JsonStringStorage(const String& text)
 	{
 		stor = text;
 	}
+
+	virtual ~JsonStringStorage(){
+	}
+
 	String& value() { return stor; }
 	const char* c_str() { return stor.c_str(); }
 

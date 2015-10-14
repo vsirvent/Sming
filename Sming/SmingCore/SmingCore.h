@@ -25,6 +25,7 @@
 #include "Timer.h"
 #include "Wire.h"
 #include "SPISoft.h"
+#include "UdpLog.h"
 
 #include "Platform/System.h"
 #include "Platform/Station.h"

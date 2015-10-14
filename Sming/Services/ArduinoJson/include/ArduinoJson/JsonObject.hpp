@@ -120,6 +120,7 @@ class JsonObject : public Internals::JsonPrintable<JsonObject>,
  private:
   // Create an empty JsonArray attached to the specified JsonBuffer.
   explicit JsonObject(JsonBuffer *buffer) : Internals::List<JsonPair>(buffer) {}
+  virtual ~JsonObject(){}
 
   // Returns the list node that matches the specified key.
   node_type *getNodeAt(key_type key) const;

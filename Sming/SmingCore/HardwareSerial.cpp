@@ -65,7 +65,7 @@ void HardwareSerial::begin(const uint32_t baud/* = 9600*/)
 
 	ETS_UART_INTR_ENABLE();
 	delay(10);
-	Serial.println("\r\n"); // after SPAM :)
+	HWSerial.println("\r\n"); // after SPAM :)
 }
 
 size_t HardwareSerial::write(uint8_t oneChar)
@@ -183,7 +183,7 @@ void HardwareSerial::commandProcessing(bool reqEnable)
 	{
 		if (!memberData[uart].commandExecutor)
 		{
-			memberData[uart].commandExecutor = new CommandExecutor(&Serial);
+			memberData[uart].commandExecutor = new CommandExecutor(&HWSerial);
 		}
 	}
 	else
@@ -243,7 +243,7 @@ void HardwareSerial::uart0_rx_intr_handler(void *para)
         	unsigned short cc;
         	cc = (pRxBuff->pWritePos < pRxBuff->pReadPos) ? ((pRxBuff->pWritePos + RX_BUFF_SIZE) - pRxBuff->pReadPos)
         													: (pRxBuff->pWritePos - pRxBuff->pReadPos);
-        	memberData[UART_ID_0].HWSDelegate(Serial, RcvChar, cc);
+        	memberData[UART_ID_0].HWSDelegate(HWSerial, RcvChar, cc);
         }
       if (memberData[UART_ID_0].commandExecutor)
       {
@@ -254,4 +254,4 @@ void HardwareSerial::uart0_rx_intr_handler(void *para)
 }
 
 
-HardwareSerial Serial(UART_ID_0);
+HardwareSerial HWSerial(UART_ID_0);

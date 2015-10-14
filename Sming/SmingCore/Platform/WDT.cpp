@@ -1,12 +1,12 @@
 /*
  * WDT.cpp
  *
- *  Created on: 06 апр. 2015 г.
+ *  Created on: 06 пїЅпїЅпїЅ. 2015 пїЅ.
  *      Author: Anakod
  */
 
 #include "WDT.h"
-
+#include <user_interface.h>
 WDTClass WDT;
 
 WDTClass::WDTClass()
@@ -26,6 +26,7 @@ void WDTClass::enable(bool enableWatchDog)
 void WDTClass::alive()
 {
 	WRITE_PERI_REG(0x60000914, 0x73);
+	system_soft_wdt_feed();
 }
 
 void WDTClass::onSystemReady()

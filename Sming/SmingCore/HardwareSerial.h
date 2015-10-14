@@ -59,6 +59,6 @@ private:
 
 };
 
-extern HardwareSerial Serial;
+extern HardwareSerial HWSerial;
 
 #endif /* _HARDWARESERIAL_H_ */

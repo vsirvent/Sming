@@ -9,6 +9,8 @@
 //#include <stddef.h>  // for size_t
 //#include <stdint.h>  // for uint8_t
 #include <user_config.h>
+#include "../../../../Wiring/WVector.h"
+#include "../../../../SmingCore/UdpLog.h"
 
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
@@ -17,9 +19,14 @@
 #endif
 
 namespace ArduinoJson {
+
 class JsonArray;
 class JsonObject;
 class JsonStringStorage;
+
+namespace Internals {
+class JsonBufferAllocated;
+}
 
 // Entry point for using the library.
 //
@@ -27,6 +34,8 @@ class JsonStringStorage;
 // This abstract class is implemented by StaticJsonBuffer which implements a
 // fixed memory allocation.
 class JsonBuffer {
+private:
+	Vector<Internals::JsonBufferAllocated*> allocs;
  public:
   // CAUTION: NO VIRTUAL DESTRUCTOR!
   // If we add a virtual constructor the Arduino compiler will add malloc() and
@@ -75,6 +84,7 @@ class JsonBuffer {
   // Return a pointer to the allocated memory or NULL if allocation fails.
   virtual void *alloc(size_t size) = 0;
 
+  virtual ~JsonBuffer();
   // Default value of nesting limit of parseArray() and parseObject().
   //
   // The nesting limit is a contain on the level of nesting allowed in the JSON

@@ -92,6 +92,8 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   explicit JsonArray(JsonBuffer *buffer)
       : Internals::List<JsonVariant>(buffer) {}
 
+  virtual ~JsonArray(){}
+
   // The instance returned by JsonArray::invalid()
   static JsonArray _invalid;
 };
