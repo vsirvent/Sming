@@ -74,7 +74,7 @@ else
       SMING_HOME ?= /opt/sming/Sming
 
       # Default ESP_HOME. Can be overriden.
-      #ESP_HOME ?= /opt/esp-open-sdk
+      ESP_HOME ?= /opt/esp-open-sdk
 
       include $(SMING_HOME)/Makefile-macos.mk      
   endif
@@ -86,7 +86,7 @@ else
       SMING_HOME ?= /opt/sming/Sming
 
       # Default ESP_HOME. Can be overriden.
-      #ESP_HOME ?= /opt/esp-open-sdk
+      ESP_HOME ?= /opt/esp-open-sdk
       include $(SMING_HOME)/Makefile-linux.mk     
   endif
   ifeq ($(UNAME),FreeBSD)
@@ -125,11 +125,11 @@ TARGET		= app
 # define your custom directories in the project's own Makefile before including this one
 MODULES 	?= app  # if not initialized by user 
 MODULES		+= $(SMING_HOME)/appinit
-EXTRA_INCDIR    ?= $(ESP_HOME)/include include $(SMING_HOME)/include $(SMING_HOME)/ $(SMING_HOME)/system/include $(SMING_HOME)/Wiring $(SMING_HOME)/Libraries $(SMING_HOME)/SmingCore $(SDK_BASE)/../include $(SMING_HOME)/rboot $(SMING_HOME)/rboot/appcode
+EXTRA_INCDIR    ?= include $(SMING_HOME)/include $(SMING_HOME)/ $(SMING_HOME)/system/include $(SMING_HOME)/Wiring $(SMING_HOME)/Libraries $(SMING_HOME)/SmingCore $(SDK_BASE)/../include $(SMING_HOME)/rboot $(SMING_HOME)/rboot/appcode
 
 # libraries used in this project, mainly provided by the SDK
 USER_LIBDIR = $(SMING_HOME)/compiler/lib/
-LIBS		= microc microgcc hal phy pp net80211 lwip wpa main sming  $(EXTRA_LIBS)
+LIBS		= microc microgcc hal phy pp net80211 lwip wpa main sming $(EXTRA_LIBS)
 
 # compiler flags using during compilation of source files
 CFLAGS		= -Os -g -Wpointer-arith -Wundef -Werror -Wl,-EL -nostdlib -mlongcalls -mtext-section-literals -finline-functions -fdata-sections -ffunction-sections -D__ets__ -DICACHE_FLASH -DARDUINO=106
@@ -284,7 +284,7 @@ $(TARGET_OUT): $(APP_AR)
 	
 	$(Q) $(MEMANALYZER) $@ > $(FW_MEMINFO_NEW)
 	
-	$(Q) if [[ -f "$(FW_MEMINFO_NEW)"  && -f "$(FW_MEMINFO_OLD)" ]]; then \
+	$(Q) if [[ -f "$(FW_MEMINFO_NEW)" && -f "$(FW_MEMINFO_OLD)" ]]; then \
 	  awk -F "|" 'FILENAME == "$(FW_MEMINFO_OLD)" { arr[$$1]=$$5 } FILENAME == "$(FW_MEMINFO_NEW)" { if (arr[$$1] != $$5){printf "%s%s%+d%s", substr($$0, 1, length($$0) - 1)," (",$$5 - arr[$$1],")\n" } else {print $$0} }' $(FW_MEMINFO_OLD) $(FW_MEMINFO_NEW); \
 	elif [ -f "$(FW_MEMINFO_NEW)" ]; then \
 	  cat $(FW_MEMINFO_NEW); \
